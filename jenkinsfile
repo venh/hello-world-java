@@ -1,0 +1,69 @@
+
+pipeline{
+ agent	 any
+   options {
+		skipDefaultCheckout()
+	}
+ environment {
+	   BLD_STATUS = '$BUILD_STATUS'
+	   PRJ_NAME = '$PROJECT_NAME'
+ }// end of environment
+ stages{
+	  stage('CleanWorkspace') {
+            steps {
+                cleanWs()
+            }
+        }
+   stage("Checkout Source"){
+     steps{
+	    checkout(
+                    changelog: false,
+                    poll: false,
+                    scm: [
+                        $class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [
+                            [$class: 'RelativeTargetDirectory', relativeTargetDir: '.']
+                        ],
+                        gitTool: 'Default',
+                        submoduleCfg: [],
+                        userRemoteConfigs: [
+                            [
+                                url: 'https://github.com/venh/hello-world-java.git'				    
+                            ]
+                        ]
+                    ]
+                )
+	 }//end of steps
+   }//end of stage
+   stage("Compile"){
+     steps{
+		 echo "Compilation..."
+	    script{
+			sh "mvn clean package"
+		}//end of script
+	 }//end of steps
+   }//end of stage
+ }//end of stages
+ post{
+      always{
+		// emailext(
+            // to: '$DEFAULT_RECIPIENTS',
+            // subject: "[${env.BLD_STATUS}] - ${env.PRJ_NAME} - Build # ${BUILD_NUMBER} ($BUILD_ID)",
+            // body: '''${SCRIPT, template="custom-html.template"}''',
+            // recipientProviders: [culprits(),
+                     // developers(),
+                     // requestor(),
+                     // brokenBuildSuspects(),
+                     // brokenTestsSuspects(),
+                     // upstreamDevelopers()
+                     // ]
+        // )
+		sendEmail('$DEFAULT_RECIPIENTS', null, "[${env.BLD_STATUS}] - ${env.PRJ_NAME} - Build # ${BUILD_NUMBER} ($BUILD_ID)", '''${SCRIPT, template="custom-html.template"}''') 
+      }
+      //failure{
+        //sendEmail('$DEFAULT_RECIPIENTS', null, "Build Failed", '''${SCRIPT, template="custom-html.template"}''') 
+      //}
+    } // end of post
+}//end of Pipeline
