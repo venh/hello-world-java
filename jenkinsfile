@@ -2,7 +2,7 @@
 pipeline{
  agent	 any
    options {
-	 skipDefaultCheckout()
+	  skipDefaultCheckout()
 	}
  environment {
 	   BLD_STATUS = '$BUILD_STATUS'
