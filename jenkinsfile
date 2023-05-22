@@ -49,6 +49,11 @@ pipeline{
    }//end of stage
  }//end of stages
  post{
+      success {
+         script {
+	    sh "java -cp target/helloworld-1.1.jar com.demo.helloworld.HelloWorld"
+	 }
+      }
       always{		
 	  //sendEmail('$DEFAULT_RECIPIENTS', null, "[${env.BLD_STATUS}] - ${env.PRJ_NAME} - Build # ${BUILD_NUMBER} ($BUILD_ID)", '''${SCRIPT, template="custom-html.template"}''') 
 	  printMsg("$JOB_BASE_NAME")
